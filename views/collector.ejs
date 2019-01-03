@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+
+    <title>Geo</title>
+    <style>
+        header {
+            background-color: #FF3719;
+            color: white;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            z-index: -1;
+            top: 0px;
+            left: 0px;
+        }
+
+        .helptext {
+            text-shadow: 2px 2px #fff
+        }
+
+        .leftbutton {
+            background-color: whitesmoke;
+            position: fixed;
+            bottom: 50px;
+            left: 10px;
+            height: 72px;
+            width: 72px;
+        }
+
+        .rightbutton {
+            background-color: whitesmoke;
+            position: fixed;
+            bottom: 50px;
+            right: 10px;
+            height: 72px;
+            width: 72px;
+        }
+
+        .centerbar {
+            position: absolute;            
+            margin-bottom: auto;
+            width: 100px;
+            height: 30px;
+            left: 50%;
+            right: 25%;
+            bottom: 0;
+            margin-left: -50px;
+            background-color: whitesmoke;
+        }
+
+        .appname {
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+  </head>
+  <body>
+    <center>
+        <header>
+            <form>
+                <!-- @TODO Dynamically update app name from the database -->
+                <input class="appname" type="text" placeholder="App Name">
+                <button class="btn btn-primary" type="submit">Change</button>
+            </form>
+        </header>
+    </center>
+
+    <div id="map">
+        <p>If you are seeing this message, please ensure that JavaScript is running on this device.</p>
+    </div>
+
+    <div class="modal fade" id="locationError" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Whoops!</h4>
+            </div>
+            <div class="modal-body">
+                <p>You'll need to allow the browser to use your location for this application to work properly.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Okay!</button>
+            </div>
+            </div>   
+        </div>
+    </div>  
+    
+    <div class="leftbutton">        
+    </div>
+
+    <div class="rightbutton">
+    </div>
+
+    <!-- @TODO Animate the center bar so it bounces up and shows the attributes in the database table -->
+    <div class="centerbar">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    
+    <script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+
+    <script>
+        var lat = 0;
+        var long = 0;
+        var map = null;
+
+        function findLocation() {
+            return new Promise(resolve => { 
+                // @TODO Get user's location to show up on the background map 
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        lat = position.coords.latitude;
+                        long = position.coords.longitude;                                               
+                        resolve("location found")                        
+                    });                   
+                } else {
+                    // @TODO show error popup
+                    $('#locationError').modal('show');
+                    resolve("no location")
+                }
+            })
+        }
+
+        async function loadMap() {
+            let res = await findLocation(); 
+            // @TODO Hide access token 
+            L.mapbox.accessToken = 'pk.eyJ1IjoidGRhbXJvbiIsImEiOiJjajl6MHpkNTc4amQ0MzJzNGUxdjJpcDN3In0.3n2KgdxNOKO3yp4I3JL0Lg';
+            map = L.mapbox.map('map', 'mapbox.streets')
+            map.setView([lat, long], 20);            
+
+            L.marker([lat, long]).addTo(map);
+        }
+
+        async function updateLocation() {
+            let res = await findLocation();
+            map.setView([lat, long], 20);
+        }
+        
+        $(window).on('load', () => {
+            loadMap();
+        });
+
+        $(".leftbutton").click(() => {
+            updateLocation();
+        });
+    </script>
+</body>
+</html>
